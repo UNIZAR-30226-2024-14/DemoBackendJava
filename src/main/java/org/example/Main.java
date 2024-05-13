@@ -1,9 +1,11 @@
 package org.example;
 
+import com.google.gson.Gson;
 import org.java_websocket.client.WebSocketClient;
 
 import java.net.URI;
 import java.net.URISyntaxException;
+import java.util.Map;
 import java.util.Scanner;
 
 public class Main {
@@ -16,6 +18,7 @@ public class Main {
     for (int i = 0; i < 5; i++) {
       access_token += (char)('a' + (int)(Math.random() * 26));
     }
+//    access_token = "unizar";
     System.out.println("Access token: " + access_token);
 
 //    String what = "chat";
@@ -38,6 +41,7 @@ public class Main {
       System.out.println("Connection failed.");
       System.exit(1);
     }
+
     Scanner scanner = new Scanner(System.in);
 
     if (what.equals("chat")) {
@@ -57,19 +61,32 @@ public class Main {
         BlackjackClient.Action action = pair.action;
         var message = pair.map;
 
-//        if (message != null && !message.isEmpty())
-//          System.out.println("RAW: " + message);
+        // Pretty print
+        if (message != null && !message.isEmpty()) {
+          System.out.println("Game state:");
+          for (Map.Entry<?, ?> entry : message.entrySet()) {
+            System.out.println("\t"+ entry.getKey() + ": " + entry.getValue());
+          }
+        }
 
         switch (action) {
           case BET:
             System.out.print("Enter bet amount: ");
             String bet = scanner.nextLine();
+            if (bet.equals("pause")) {
+              client.send("{\"action\": \"pause\"}");
+              break;
+            }
             client.send("{\"action\": \"bet\", \"value\": \""+ bet + "\"}");
             break;
           case TURN:
-            System.out.println(message);
+//            System.out.println(message);
             System.out.print("Enter action (hit/stand): ");
             String turn = scanner.nextLine();
+            if (turn.equals("pause")) {
+              client.send("{\"action\": \"pause\"}");
+              break;
+            }
             client.send("{\"action\": \""+ turn + "\"}");
             break;
           case DRAW:
@@ -91,71 +108,5 @@ public class Main {
 
     scanner.close();
     client.close();
-
-    /*
-    String ws_server = ws_uri;
-    String access_token;
-    String room;
-
-    switch (args.length) {
-      case 3: ws_server = args[2];
-      case 2:
-        access_token = args[1];
-        room = args[0];
-        break;
-      default:
-        System.out.println("Usage: java -jar WBClient.jar <room> <access_token> [ws_server (default: ws://localhost:8000)]");
-        return;
-    }
-
-    System.out.println("Connecting to room " + room + " at " + ws_server + " with access token " + access_token);
-
-    Scanner scanner = new Scanner(System.in);
-
-    BlackjackClient client = new BlackjackClient(room, access_token, ws_server + blackjack_uri);
-    client.connect();
-
-    System.out.println("Connecting...");
-    while (!client.isOpen() && !client.isClosed()) {
-      Thread.sleep(100);
-    }
-
-    if (client.isClosed()) {
-      System.out.println("Connection failed.");
-    }
-
-    while (client.isOpen()) {
-      BlackjackClient.Pair pair = client.parseMessage();
-      BlackjackClient.Action action = pair.action;
-      var message = pair.map;
-
-      switch (action) {
-        case BET:
-          System.out.print("Enter bet amount: ");
-          String bet = scanner.nextLine();
-          client.send("{\"bet\": \""+ bet + "\"}");
-          break;
-        case TURN:
-          System.out.println(message);
-          System.out.print("Enter action (0/1): ");
-          String turn = scanner.nextLine();
-          client.send("{\"action\": \""+ turn + "\"}");
-          break;
-        case DRAW:
-          System.out.println("Drawing card...");
-          System.out.println(message);
-          break;
-        case END:
-          System.out.println("Game ended.");
-          System.out.println(message);
-          break;
-        case NONE:
-        default: break;
-      }
-    }
-
-    scanner.close();
-    client.close();
-     */
   }
 }

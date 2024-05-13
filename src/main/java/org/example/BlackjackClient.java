@@ -65,7 +65,7 @@ public class BlackjackClient extends WebSocketClient {
     Gson gson = new Gson();
     var map = gson.fromJson(s, Map.class);
     messages.add(map);
-    System.out.println("received message: " + s);
+//    System.out.println("received message: " + s);
   }
 
   public Pair parseMessage() {
